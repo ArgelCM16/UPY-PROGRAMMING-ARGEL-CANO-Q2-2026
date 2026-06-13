@@ -1,0 +1,64 @@
+#LIBRARIES
+IMPORT math
+
+#INPUT
+GET a      FROM user 
+GET b      FROM user 
+GET f_x    FROM user 
+GET method FROM user 
+
+#PROCESS
+IF "pi" is in a THEN
+    REPLACE "pi" with value of math.pi in a
+    a ← EVALUATE a
+ELSE
+    a ← CONVERT a TO decimal
+ENDIF
+
+IF "pi" is in b THEN
+    REPLACE "pi" with value of math.pi in b
+    b ← EVALUATE b
+ELSE
+    b ← CONVERT b TO decimal
+ENDIF
+
+n        ← 1000
+h        ← (b - a) / n
+area     ← 0.0
+constant ← 0
+shift    ← 0
+variable ← 0
+
+#METHODS
+IF method is equal to "RRM" THEN
+    shift ← 1
+ENDIF
+
+IF method is equal to "MRM" THEN
+    constant ← h / 2
+ENDIF
+
+IF method is equal to "TRAP" THEN
+    variable ← 1
+    f_0  ← EVALUATE f_x at x = a
+    area ← area + (h / 2) * f_0
+
+    FOR i FROM variable TO n - 1 DO
+        xi   ← a + i * h
+        f_xi ← EVALUATE f_x at x = xi
+        area ← area + (h / 2) * 2 * f_xi
+    ENDFOR
+
+    f_xn ← EVALUATE f_x at x = b
+    area ← area + (h / 2) * f_0
+
+ELSE
+    FOR i FROM shift TO (n + shift) - 1 DO
+        xi     ← a + i * h
+        height ← EVALUATE f_x at x = (xi + constant)
+        area   ← area + h * height
+    ENDFOR
+ENDIF
+
+#OUTPUT
+DISPLAY "the integration of " + f_x + " is " + area 
