@@ -1,0 +1,168 @@
+CLASSWORK 10 - SCHOOL MANAGEMENT SYSTEM
+PSEUDOCODE
+
+START
+
+DECLARE studentList ← empty list
+DECLARE running ← true
+
+
+WHILE running = true DO
+    DISPLAY "===== SCHOOL MANAGEMENT SYSTEM ====="
+    DISPLAY "1. Manage Students"
+    DISPLAY "2. View Records"
+    DISPLAY "3. Generate Reports"
+    DISPLAY "4. Exit"
+    INPUT mode
+
+    IF mode = 1 THEN
+        CALL ManageStudents(studentList)
+    ELSE IF mode = 2 THEN
+        CALL ViewRecords(studentList)
+    ELSE IF mode = 3 THEN
+        CALL GenerateReports(studentList)
+    ELSE IF mode = 4 THEN
+        running ← false
+        DISPLAY "Goodbye!"
+    ELSE
+        DISPLAY "Invalid option, try again"
+    END IF
+END WHILE
+
+END
+
+MODULE ManageStudents(studentList)
+    DECLARE inSubMenu ← true
+
+    WHILE inSubMenu = true DO
+        DISPLAY "--- Manage Students ---"
+        DISPLAY "1. Add Student"
+        DISPLAY "2. Remove Student"
+        DISPLAY "3. Update Grade"
+        DISPLAY "4. Back to Main Menu"
+        INPUT choice
+
+        IF choice = 1 THEN
+            INPUT studentName
+            INPUT studentID
+            INPUT studentGrade
+            DECLARE newStudent ← {id: studentID, name: studentName, grade: studentGrade}
+            APPEND newStudent TO studentList
+            DISPLAY "Student added successfully"
+
+        ELSE IF choice = 2 THEN
+            INPUT searchID
+            DECLARE found ← false
+            FOR EACH student IN studentList DO
+                IF student.id = searchID THEN
+                    REMOVE student FROM studentList
+                    found ← true
+                    EXIT FOR
+                END IF
+            END FOR
+            IF found = true THEN
+                DISPLAY "Student removed successfully"
+            ELSE
+                DISPLAY "Student not found"
+            END IF
+
+        ELSE IF choice = 3 THEN
+            INPUT searchID
+            INPUT newGrade
+            DECLARE found ← false
+            FOR EACH student IN studentList DO
+                IF student.id = searchID THEN
+                    student.grade ← newGrade
+                    found ← true
+                    EXIT FOR
+                END IF
+            END FOR
+            IF found = true THEN
+                DISPLAY "Grade updated successfully"
+            ELSE
+                DISPLAY "Student not found"
+            END IF
+
+        ELSE IF choice = 4 THEN
+            inSubMenu ← false
+
+        ELSE
+            DISPLAY "Invalid option, try again"
+        END IF
+    END WHILE
+END MODULE
+
+
+MODULE ViewRecords(studentList)
+    DECLARE inSubMenu ← true
+
+    WHILE inSubMenu = true DO
+        DISPLAY "--- View Records ---"
+        DISPLAY "1. Search Student"
+        DISPLAY "2. Display All Students"
+        DISPLAY "3. Back to Main Menu"
+        INPUT choice
+
+        IF choice = 1 THEN
+            INPUT searchTerm
+            DECLARE found ← false
+            FOR EACH student IN studentList DO
+                IF student.id = searchTerm OR student.name = searchTerm THEN
+                    DISPLAY student.id, student.name, student.grade
+                    found ← true
+                END IF
+            END FOR
+            IF found = false THEN
+                DISPLAY "Student not found"
+            END IF
+
+        ELSE IF choice = 2 THEN
+            IF studentList is empty THEN
+                DISPLAY "No students registered"
+            ELSE
+                FOR EACH student IN studentList DO
+                    DISPLAY student.id, student.name, student.grade
+                END FOR
+            END IF
+
+        ELSE IF choice = 3 THEN
+            inSubMenu ← false
+
+        ELSE
+            DISPLAY "Invalid option, try again"
+        END IF
+    END WHILE
+END MODULE
+
+MODULE GenerateReports(studentList)
+    IF studentList is empty THEN
+        DISPLAY "No students registered, cannot generate report"
+    ELSE
+        DECLARE total ← 0
+        DECLARE highest ← studentList[0].grade
+        DECLARE highestName ← studentList[0].name
+        DECLARE lowest ← studentList[0].grade
+        DECLARE lowestName ← studentList[0].name
+
+        FOR EACH student IN studentList DO
+            total ← total + student.grade
+
+            IF student.grade > highest THEN
+                highest ← student.grade
+                highestName ← student.name
+            END IF
+
+            IF student.grade < lowest THEN
+                lowest ← student.grade
+                lowestName ← student.name
+            END IF
+        END FOR
+
+        DECLARE average ← total / LENGTH(studentList)
+
+        DISPLAY "--- Class Report ---"
+        DISPLAY "Class Average: ", average
+        DISPLAY "Highest Grade: ", highestName, highest
+        DISPLAY "Lowest Grade: ", lowestName, lowest
+    END IF
+END MODULE
