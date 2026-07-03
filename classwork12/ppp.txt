@@ -1,0 +1,50 @@
+START
+
+// Step 1: Read the configuration file
+Define Dictionary 'config'
+Open file "config.txt" in read mode
+
+For each line in the file "config.txt":
+    If the line contains "=":
+        Split the line into two parts: 'key' and 'value'
+        If the 'value' contains a decimal point:
+            config[key] = Convert to Float(value)
+        Else:
+            config[key] = Convert to Integer(value)
+
+Close file "config.txt"
+
+// Step 2: Read the fractal data file
+Open file "clase.csv" in read mode
+Read all lines from the file and store them in a list called 'data'
+Close file "clase.csv"
+
+// Step 3: Initialize variables and the image
+height = Convert to Integer(config["alto"])
+width = Convert to Integer(config["ancho"])
+max_iter = Convert to Integer(config["max_iter"])
+
+Create a new image 'img' using the HSV color model with dimensions (width, height)
+
+// Step 4: Process the data and draw the pixels
+Remove the first element of the 'data' list // Remove the header
+
+For each line in the 'data' list:
+    Extract 'row', 'column', and 'iterations' by splitting by commas and converting to integers
+    
+    // Calculate color based on iterations
+    If iterations equals max_iter:
+        brightness = 0
+    Else:
+        brightness = (iterations * 255) / max_iter
+        
+    // Color the pixel in the image
+    Draw pixel at position (column, row) on 'img' with the HSV color (brightness, 255, 255)
+
+// Step 5: Export the final image
+Convert 'img' from the HSV model to the RGB model
+Save the resulting image as "fractal.png"
+
+Print "done" to the screen
+
+END
