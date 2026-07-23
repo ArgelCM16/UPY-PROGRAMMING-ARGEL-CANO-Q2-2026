@@ -1,0 +1,83 @@
+#LIBRARIES
+IMPORT image library
+
+#INPUT
+GET mode   FROM user      # expected value: TEXT, GRAY, or COLOR
+GET width  FROM user      # number of pixel columns
+GET height FROM user      # number of pixel rows
+
+#PROCESS
+x_min          ← -2.0
+x_max          ← 1.0
+y_min          ← -1.5
+y_max          ← 1.5
+max_iterations ← 100
+
+CREATE grid WITH width COLUMNS AND height ROWS
+
+#ITERATION FLOW (shared by all three modes)
+FOR row FROM 0 TO height - 1 DO
+    FOR col FROM 0 TO width - 1 DO
+        x0 ← x_min + (col / width)  * (x_max - x_min)
+        y0 ← y_min + (row / height) * (y_max - y_min)
+
+        zx        ← 0.0
+        zy        ← 0.0
+        iteration ← 0
+
+        WHILE (zx * zx + zy * zy) <= 4 AND iteration < max_iterations DO
+            temp_zx ← zx * zx - zy * zy + x0
+            zy      ← 2 * zx * zy + y0
+            zx      ← temp_zx
+            iteration ← iteration + 1
+        ENDWHILE
+
+        grid[row][col] ← iteration
+    ENDFOR
+ENDFOR
+
+#MODES (decision flow)
+IF mode is equal to "TEXT" THEN
+    ramp ← " .:-=+*#%@"
+    FOR row FROM 0 TO height - 1 DO
+        line ← ""
+        FOR col FROM 0 TO width - 1 DO
+            IF grid[row][col] is equal to max_iterations THEN
+                symbol ← " "
+            ELSE
+                ratio    ← grid[row][col] / max_iterations
+                position ← CONVERT (ratio * length of ramp) TO integer
+                symbol   ← CHARACTER FROM ramp AT position
+            ENDIF
+            line ← line + symbol
+        ENDFOR
+        DISPLAY line
+    ENDFOR
+
+ELSE IF mode is equal to "GRAY" THEN
+    CREATE image WITH width COLUMNS AND height ROWS
+    FOR row FROM 0 TO height - 1 DO
+        FOR col FROM 0 TO width - 1 DO
+            ratio           ← grid[row][col] / max_iterations
+            shade           ← 1.0 - ratio
+            image[row][col] ← shade
+        ENDFOR
+    ENDFOR
+    SAVE image AS "mandelbrot_gray.png" USING grayscale colors
+
+ELSE IF mode is equal to "COLOR" THEN
+    CREATE image WITH width COLUMNS AND height ROWS
+    FOR row FROM 0 TO height - 1 DO
+        FOR col FROM 0 TO width - 1 DO
+            ratio           ← grid[row][col] / max_iterations
+            image[row][col] ← ratio
+        ENDFOR
+    ENDFOR
+    SAVE image AS "mandelbrot_color.png" USING color map
+
+ELSE
+    DISPLAY "unknown mode"
+ENDIF
+
+#OUTPUT
+DISPLAY "Mandelbrot set generated in " + mode + " mode"

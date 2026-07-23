@@ -1,0 +1,26 @@
+#TITLE
+Spanish Verb Conjugator (regular -ar/-er/-ir verbs)
+
+#INPUT
+GET verbo FROM user      # infinitive verb, e.g. "amar"
+
+#PROCESS
+pronombres ← ["yo", "tu", "el", "nosotros", "vosotros", "ellos"]
+
+terminaciones ← {
+    "ar": ["o", "as", "a", "amos", "ais", "an"],
+    "er": ["o", "es", "e", "emos", "eis", "en"],
+    "ir": ["o", "es", "e", "imos", "is", "en"]
+}
+
+raiz_delverbo  ← ALL CHARACTERS OF verbo EXCEPT the last two
+final_delverbo ← LAST TWO CHARACTERS OF verbo
+
+finaldelverbo_lista ← terminaciones[final_delverbo]
+
+#OUTPUT
+FOR index FROM 0 TO (length of pronombres) - 1 DO
+    pronombre    ← pronombres[index]
+    terminacion  ← finaldelverbo_lista[index]
+    DISPLAY pronombre + " " + raiz_delverbo + terminacion
+ENDFOR

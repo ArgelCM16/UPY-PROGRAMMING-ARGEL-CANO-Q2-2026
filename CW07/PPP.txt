@@ -1,0 +1,31 @@
+#TITLE
+Digito verificador (check digit calculator)
+
+#INPUT
+GET rol FROM user      # the number without its check digit, as text
+
+#PROCESS
+rol_invertido ← REVERSE rol
+
+multiplicadores ← [2, 3, 4, 5, 6, 7]
+suma           ← 0
+
+FOR i FROM 0 TO (length of rol_invertido) - 1 DO
+    digito       ← CONVERT rol_invertido[i] TO integer
+    multiplicador ← multiplicadores[i MOD length of multiplicadores]
+    suma ← suma + (digito * multiplicador)
+ENDFOR
+
+resto ← suma MOD 11
+
+IF resto is equal to 0 THEN
+    digito_verificador ← "0"
+ELSE IF resto is equal to 1 THEN
+    digito_verificador ← "K"
+ELSE
+    digito_verificador ← CONVERT (11 - resto) TO string
+ENDIF
+
+#OUTPUT
+DISPLAY "El digito verificador es: " + digito_verificador
+DISPLAY "ROL completo: " + rol + "-" + digito_verificador
