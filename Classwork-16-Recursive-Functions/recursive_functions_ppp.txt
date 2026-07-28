@@ -1,0 +1,159 @@
+#GENERAL NOTE
+#Every function below follows the same shape: validate the input first, check
+#the base case, otherwise shrink the problem and call itself again. Every
+#function is also wrapped so that if the recursion still goes too deep
+#(a case not caught by validation), it is stopped with a message instead of
+#crashing the program.
+
+#FUNCTION recursiva(n)
+    IF n is not an integer THEN
+        DISPLAY "recursiva: n debe ser un entero"
+        RETURN nothing
+    ENDIF
+    IF n < 0 THEN
+        DISPLAY "recursiva: n no puede ser negativo"
+        RETURN nothing
+    ENDIF
+    #BASE CASE
+    IF n = 0 THEN
+        RETURN "Done!"
+    ELSE
+        DISPLAY n
+        RETURN recursiva(n - 1)
+    ENDIF
+#ENDFUNCTION
+
+#FUNCTION fibonacci(n)
+    IF n is not an integer THEN
+        DISPLAY "fibonacci: n debe ser un entero"
+        RETURN nothing
+    ENDIF
+    IF n < 0 THEN
+        DISPLAY "fibonacci: n no puede ser negativo"
+        RETURN nothing
+    ENDIF
+    #BASE CASE
+    IF n = 0 OR n = 1 THEN
+        RETURN n
+    ELSE
+        RETURN fibonacci(n - 1) + fibonacci(n - 2)
+    ENDIF
+#ENDFUNCTION
+
+#FUNCTION factorial(n)
+    IF n is not an integer THEN
+        DISPLAY "factorial: n debe ser un entero"
+        RETURN nothing
+    ENDIF
+    IF n < 0 THEN
+        DISPLAY "factorial: n no puede ser negativo"
+        RETURN nothing
+    ENDIF
+    #BASE CASE
+    IF n = 0 OR n = 1 THEN
+        RETURN 1
+    ELSE
+        RETURN factorial(n - 1) * n
+    ENDIF
+#ENDFUNCTION
+
+#FUNCTION multiplicacion_recursiva(n, m)
+    IF m is not an integer THEN
+        DISPLAY "multiplicacion_recursiva: m debe ser un entero"
+        RETURN nothing
+    ENDIF
+    IF m < 0 THEN
+        DISPLAY "multiplicacion_recursiva: m no puede ser negativo"
+        RETURN nothing
+    ENDIF
+    #BASE CASE
+    IF m = 0 THEN
+        RETURN 0
+    ELSE
+        RETURN multiplicacion_recursiva(n, m - 1) + n
+    ENDIF
+#ENDFUNCTION
+
+#FUNCTION division_entera_recursiva(dividendo, divisor)
+    IF dividendo is not numeric OR divisor is not numeric THEN
+        DISPLAY "division_entera_recursiva: dividendo y divisor deben ser numéricos"
+        RETURN nothing
+    ENDIF
+    IF divisor = 0 THEN
+        DISPLAY "division_entera_recursiva: no se puede dividir entre cero"
+        RETURN nothing
+    ENDIF
+    #BASE CASE
+    IF (dividendo - divisor) < 0 THEN
+        RETURN 0
+    ELSE
+        RETURN division_entera_recursiva(dividendo - divisor, divisor) + 1
+    ENDIF
+#ENDFUNCTION
+
+#FUNCTION potencia_recursiva(base, exponente)
+    IF exponente is not an integer THEN
+        DISPLAY "potencia_recursiva: exponente debe ser un entero"
+        RETURN nothing
+    ENDIF
+    IF exponente < 0 THEN
+        DISPLAY "potencia_recursiva: exponente no puede ser negativo"
+        RETURN nothing
+    ENDIF
+    #BASE CASE
+    IF exponente = 0 THEN
+        RETURN 1
+    ELSE
+        RETURN potencia_recursiva(base, exponente - 1) * base
+    ENDIF
+#ENDFUNCTION
+
+#FUNCTION serie_collatz(n)
+    IF n is not an integer THEN
+        DISPLAY "serie_collatz: n debe ser un entero"
+        RETURN nothing
+    ENDIF
+    IF n < 1 THEN
+        DISPLAY "serie_collatz: n debe ser mayor o igual a 1"
+        RETURN nothing
+    ENDIF
+    #BASE CASE
+    IF n = 1 THEN
+        DISPLAY "END!"
+        RETURN 0
+    ELSE
+        IF n MOD 2 = 0 THEN
+            DISPLAY n / 2
+            RETURN serie_collatz(n / 2)
+        ELSE
+            DISPLAY 3 * n + 1
+            RETURN serie_collatz(3 * n + 1)
+        ENDIF
+    ENDIF
+#ENDFUNCTION
+
+#FUNCTION aplanar_json(diccionario, clave_padre, separador)
+    #BASE CASE (implicit): a value that is not a dictionary stops that branch
+    elementos ← empty list
+    IF diccionario does not behave like a dictionary THEN
+        DISPLAY "aplanar_json: se esperaba un diccionario"
+        RETURN nothing
+    ENDIF
+    FOR EACH key, value IN diccionario DO
+        IF clave_padre is not empty THEN
+            nueva_llave ← clave_padre + separador + key
+        ELSE
+            nueva_llave ← key
+        ENDIF
+
+        IF value is a dictionary THEN
+            #RECURSIVE CASE: flatten the nested dictionary and merge its pairs in
+            sub_elementos ← aplanar_json(value, nueva_llave, separador)
+            ADD all pairs FROM sub_elementos TO elementos
+        ELSE
+            #value is a plain value (including lists, which are NOT flattened further)
+            ADD (nueva_llave, value) TO elementos
+        ENDIF
+    ENDFOR
+    RETURN elementos AS a dictionary
+#ENDFUNCTION
