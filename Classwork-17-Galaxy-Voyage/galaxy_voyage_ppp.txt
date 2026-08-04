@@ -1,0 +1,131 @@
+#TITLE
+Galaxy Voyage — Part 1: Concept, planning, perspective math
+#Goal of this session: an animated perspective grid (no ship, no track, no
+#collision yet — those come in Part 2).
+
+#FUNCTION load_config(path)
+    config ← empty dictionary
+    TRY
+        OPEN the file at path
+        FOR EACH line IN the file DO
+            line ← TRIM line
+            IF line is empty THEN
+                SKIP to next line
+            ENDIF
+            SPLIT line ON "=" INTO parameter, value
+            IF value CONTAINS "," THEN
+                config[parameter] ← TUPLE OF integers FROM splitting value ON ","
+            ELSE IF value CONTAINS "." THEN
+                config[parameter] ← CONVERT value TO decimal
+            ELSE
+                config[parameter] ← CONVERT value TO integer
+            ENDIF
+        ENDFOR
+    CATCH file not found
+        DISPLAY "no se encontró config.txt, usando valores por defecto"
+        config ← default values FOR width, height, colors, vertical_lines,
+                  space, horizon_ratio, num_rungs, curve_power, scroll_speed
+    ENDTRY
+    RETURN config
+#ENDFUNCTION
+
+#FUNCTION calculate_x_positions(surface, vertical_lines, space)
+    #Equally spaced bottom positions for each converging line, centered on screen
+    x_positions ← empty list
+    width       ← WIDTH OF surface
+    spacing     ← space * width
+    central_line ← width / 2
+    offset      ← -(INTEGER PART OF (vertical_lines / 2))
+
+    REPEAT vertical_lines TIMES DO
+        ADD (central_line + offset * spacing) TO x_positions
+        offset ← offset + 1
+    ENDREPEAT
+
+    RETURN x_positions
+#ENDFUNCTION
+
+#FUNCTION line_intersection(line1, line2)
+    #line1 and line2 are each two points: (x1,y1)-(x2,y2) and (x3,y3)-(x4,y4)
+    #Uses the standard two-line intersection determinant
+
+    denominator ← (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)
+    IF denominator = 0 THEN
+        RETURN nothing #the lines are parallel
+    ENDIF
+
+    px ← ((x1*y2 - y1*x2)*(x3-x4) - (x1-x2)*(x3*y4 - y3*x4)) / denominator
+    py ← ((x1*y2 - y1*x2)*(y3-y4) - (y1-y2)*(x3*y4 - y3*x4)) / denominator
+    RETURN (px, py)
+#ENDFUNCTION
+
+#FUNCTION curved_y(t, vanishing_y, available_height, power)
+    #Non-linear spacing: bunches rungs near the horizon, spreads them near the bottom
+    RETURN vanishing_y + (t RAISED TO power) * available_height
+#ENDFUNCTION
+
+#FUNCTION draw_perspective_grid(surface, x_positions, vanishing_point, num_rungs, power, color, offset)
+    width  ← WIDTH OF surface
+    height ← HEIGHT OF surface
+    (vx, vy) ← vanishing_point
+    available_height ← height - vy
+
+    #converging "vertical" lines: from each bottom position toward the vanishing point
+    FOR EACH x IN x_positions DO
+        DRAW a line FROM (x, height) TO (vx, vy) USING color
+    ENDFOR
+
+    #horizontal "rungs", spaced non-linearly, animated by shifting t with offset
+    FOR i FROM 0 TO num_rungs - 1 DO
+        t ← ((i / num_rungs) + offset) MOD 1.0
+        y ← curved_y(t, vy, available_height, power)
+
+        horizontal_line ← line FROM (0, y) TO (width, y)
+        points ← empty list
+        FOR EACH x IN x_positions DO
+            vertical_line ← line FROM (x, height) TO (vx, vy)
+            point ← line_intersection(vertical_line, horizontal_line)
+            IF point is not nothing THEN
+                ADD point TO points
+            ENDIF
+        ENDFOR
+
+        IF length of points >= 2 THEN
+            SORT points BY their x value
+            DRAW a connected line THROUGH points USING color
+        ENDIF
+    ENDFOR
+#ENDFUNCTION
+
+#MAIN LOOP
+config ← load_config("config.txt")
+
+INITIALIZE the graphics library
+CREATE a window WITH size (config.width, config.height)
+
+vanishing_point ← (config.width * 0.5, config.height * config.horizon_ratio)
+x_positions ← calculate_x_positions(window, config.vertical_lines, config.space)
+DISPLAY x_positions #sanity check before trusting the drawing
+
+scroll_offset ← 0.0
+running ← TRUE
+
+WHILE running DO
+    dt ← TIME SINCE last frame
+
+    FOR EACH event IN the event queue DO
+        IF event is QUIT THEN
+            running ← FALSE
+        ENDIF
+    ENDFOR
+
+    scroll_offset ← (scroll_offset + config.scroll_speed * dt) MOD 1.0
+
+    FILL window WITH config.bg_color
+    draw_perspective_grid(window, x_positions, vanishing_point,
+                           config.num_rungs, config.curve_power,
+                           config.line_color, scroll_offset)
+    UPDATE the display
+ENDWHILE
+
+CLOSE the graphics library

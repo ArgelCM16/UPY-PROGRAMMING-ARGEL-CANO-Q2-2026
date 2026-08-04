@@ -1,0 +1,10 @@
+width=800
+height=600
+bg_color=15,15,25
+line_color=140,200,255
+vertical_lines=9
+space=0.09
+horizon_ratio=0.25
+num_rungs=14
+curve_power=2.0
+scroll_speed=0.35
